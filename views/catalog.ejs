@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" type="text/css" href="public/styles.css">
+  <link rel="stylesheet" type="text/css" href="../public/styles.css">
+  <title>templechan.org (F.K.A. 3chan.io)</title>
+  <link rel="icon" href="public/images/favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="public/images/favicon.ico" type="image/x-icon" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <script type="text/javascript">
+  $(document).ready(function(){
+      $('body').on('click','img#threadImg',function(e){
+        e.preventDefault();
+        $(this).css('width','655px');
+        $(this).attr('id','threadImgBig');
+      });
+      $('body').on('click','img#threadImgBig',function(e){
+        e.preventDefault();
+        $(this).css('width','');
+        $(this).attr('id','threadImg');
+      });
+
+      $('body').on('click','a#update',function(e){
+        e.preventDefault();
+        var URLval = window.location.pathname;
+
+        $.ajax({
+          url: URLval + '-',
+          type: 'GET',
+          dataType: 'json',
+          success: function(daten){
+
+            $('#replyChange').html('');
+            daten.replies.forEach(function(reply){
+              var replyName = reply.name;
+              var replyOptions = reply.options;
+              var replyImage = reply.image;
+              var replySubject = reply.subject;
+              var replyComment = reply.comment;
+              var replyTimestamp = reply.timestamp;
+              var replyPostNumber = reply.postNumber;
+              var replyReplies = reply.replies;
+
+              var repliesString = "";
+              for(i=0;i<replyReplies.length;i++){
+                  repliesString = repliesString + "<font size='-1'><a id='replyLink' href='#"+replyReplies[i]+"'>>>"+replyReplies[i]+"</a></font> ";
+              }
+
+              if(replyImage){
+                  $('#replyChange').append(`
+                      <div class='wrapperPostR'>
+                          <div class='postR' id='${replyPostNumber}css'>
+                              <div class='header'>
+                                  <p class='headerRight'><font color='#2d8932' size='4'><b>${replyName}</b></font> ${replyTimestamp}</p><p class='replyPostNumb' id=${replyPostNumber}><a class='postNumb'>>>${replyPostNumber}</a></p><br>
+                                  <p class='optionsLeft'>${replyOptions}</p>
+                              </div>
+                              <div class='header2'>
+
+                              </div>
+                              <div class='content' id='replyContent'>
+                                  <a href='../public/images/${replyImage}' target='_blank'>
+                                      <img align='left' id='threadImg' src='../public/images/${replyImage}'>
+                                  </a>
+                                  <div class='textArea' align='left'>${replyComment}</div>
+                              </div>
+                              <div class='repliesFooter'>
+                                  ${repliesString}
+                              </div>
+                          </div>
+                      </div>
+                      <br>
+                  `);
+              }else{
+                  $('#replyChange').append(`
+                      <div class='wrapperPostR'>
+                          <div class='postR' id='${replyPostNumber}css'>
+                              <div class='header'>
+                                  <p class='headerRight'><font color='#2d8932' size='4'><b>${replyName}</b></font> ${replyTimestamp}</p><p class='replyPostNumb' id=${replyPostNumber}><a class='postNumb'>>>${replyPostNumber}</a></p><br>
+                                  <p class='optionsLeft'>${replyOptions}</p>
+                              </div>
+                              <div class='header2'>
+
+                              </div>
+                              <div class='content' id='replyContent'>
+                                  <div class='textArea' align='left'>${replyComment}</div>
+                              </div>
+                              <div class='repliesFooter'>
+                                  ${repliesString}
+                              </div>
+                          </div>
+                      </div>
+                      <br>
+                  `);
+
+              }
+            });
+          }
+        });
+
+      });
+
+    });
+  </script>
+  <!--this is the little reply popupbox scripts-->
+  <script>
+    $(document).ready(function(){
+        $('body').on('click','p#hide2',function(){
+            $('.popupForm').css('display','none');
+        });
+
+        $('body').on('click','p.replyPostNumb',function(){
+            $('.popupForm').css('display','block');
+            getCaptcha($('#popup_comment'),"popup_comment");
+            var cursorPos = $('#comment').prop('selectionStart');
+            var v = $('#comment').val();
+            var textBefore = v.substring(0,  cursorPos );
+            var textAfter  = v.substring( cursorPos, v.length );
+            $('#comment').val(textBefore+'>>'+$(this).attr('id')+' '+textAfter);
+        });
+
+
+
+        $('form.ajaxForm2').submit(function(e){
+          e.preventDefault();
+          //stops the form from being submitted normally
+          if (!is_validate) {
+            console.log("is_validate===",is_validate);
+            alert("Invalid User.Plz Validate Captcha")
+            return false
+          }
+          //these 3 lines are important
+          var thatPath = window.location.pathname;
+          var formData = new FormData($('#form_data_main2')[0]);
+          formData.append('path', thatPath);
+
+          //these commented lines are other way of doing which u used previously.
+          // thus i had implemented the #id to get whole form.
+          // see above new formdata declaration line in code.
+
+          // var thatName = $('#name').val();
+          // var thatOptions = $('#options').val();
+          // var thatSubject = $('#subject').val();
+          // var thatComment = $('#comment').val();
+          // formData.append('name', thatName);
+          // formData.append('options', thatOptions);
+          // formData.append('subject', thatSubject);
+          // formData.append('comment', thatComment);
+
+
+
+
+          $.ajax({
+              url: '/post',
+              type: 'POST',
+              data: formData,
+              enctype: 'multipart/form-data',
+              processData: false,
+              contentType:false,
+              success: function(response){
+                  $('.popupForm').css('display','none');
+                  $('#comment').val('');
+
+
+                  //refreshing
+                  is_validate = false
+                  console.log("rrrrrrrrrrrr=====================",response);
+                  if (response && response.error) {
+                    console.log("xxxxxxxxxxxxxxxx",response);
+                    alert(response.message+"hey")
+                    return false
+                  }
+
+
+                  if(response.type == 'post'){
+                      $('#catalogGrid').html('');
+                      console.log("response ===thumbnails====",response,response.thumbnails);
+                      response.thumbnails.forEach(function(posting){
+                          var postNumberVal = posting.postNumber;
+                          var imageVal = posting.image;
+                          var subjectVal = posting.subject;
+                          var commentVal = posting.comment;
+                          var boardVal = posting.board;
+                          console.log('thumbnail printed');
+
+                              $('#catalogGrid').append("<a href='"+boardVal+"/"+postNumberVal+"'><div id='thumbnail'><img src='public/images/"+imageVal+"' class='thumbnailImg'><b>"+subjectVal+"</b><p>"+commentVal+"</p></div></a>");
+
+
+                      });
+                  }else if(response.type == 'reply'){
+                      $('#replyChange').html('');
+                      console.log("response ===replies====",response,response.replies);
+
+                      response.replies.forEach(function(reply){
+                          var replyName = reply.name;
+                          var replyOptions = reply.options;
+                          var replyImage = reply.image;
+                          var replySubject = reply.subject;
+                          var replyComment = reply.comment;
+                          var replyTimestamp = reply.timestamp
+                          var replyPostNumber = reply.postNumber;
+                          var replyReplies = reply.replies;
+
+                          var repliesString = "";
+                          for(i=0;i<replyReplies.length;i++){
+                              repliesString = repliesString+"<font size='-1'><a id='replyLink' href='#"+replyReplies[i]+"'>>>"+replyReplies[i]+"</a></font> ";
+                          }
+
+                          if(replyImage){
+                              $('#replyChange').append("<div class='wrapperPostR'><div class='postR' id='"+replyPostNumber+"css'><div class='header'><p class='headerRight'><font color='#2d8932' size='4'><b>"+replyName+"</b></font> "+replyTimestamp+"</p><p class='replyPostNumb' id='"+replyPostNumber+"'><a class='postNumb'>>>"+replyPostNumber+"</a></p><br><p class='optionsLeft'>"+replyOptions+"</p></div><div class='header2'></div><div class='content' id='replyContent'><a href='../public/images/"+replyImage+"' target='_blank'><img id='threadImg' align='left' src='../public/images/"+replyImage+"'></a><div class='textArea' align='left'>"+replyComment+"</div></div><div class='repliesFooter'>"+repliesString+"</div></div></div><br>");
+                          }else{
+                              $('#replyChange').append("<div class='wrapperPostR'><div class='postR' id='"+replyPostNumber+"css'><div class='header'><p class='headerRight'><font color='#2d8932' size='4'><b>"+replyName+"</b></font> "+replyTimestamp+"</p><p class='replyPostNumb' id='"+replyPostNumber+"'><a class='postNumb'>>>"+replyPostNumber+"</a></p><br><p class='optionsLeft'>"+replyOptions+"</p></div><div class='header2'></div><div class='content' id='replyContent'><div class='textArea' align='left'>"+replyComment+"</div></div><div class='repliesFooter'>"+repliesString+"</div></div></div><br>");
+                          }
+                      });
+                  }
+              },
+              error: function(error){
+                      return false
+                  }
+          });
+      });
+
+    });
+    </script>
+  <!--end the little reply popupbox scripts-->
+  <div class='popupForm'>
+    <form action='/post' method='POST' enctype='multipart/form-data' id="form_data_main2" class='ajaxForm2'>
+      <div class='formGrid2'>
+        <label class='standard' name='nameL'>Name</label>
+        <input type='text' name='name' placeholder='Anonymous' id='name'>
+        <label class='standard' name='optionsL'>Options</label>
+        <input type='text' name='options' id='options'>
+        <label class='standard' name='imageL'>Image</label>
+        <input type='file' name='image'>
+      </div>
+
+      <div class='formGrid2'>
+        <label class='comment' name='commentL'>Comment</label>
+        <textarea class='textArea' rows='4' cols='50' name='comment' id='comment'></textarea>
+
+        <div>
+          <div id="popup_comment">
+          </div>
+          <div>
+            <p id='hide2'>[HIDE]</p>
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </div>
+  <!--end of popup form html-->
+  <% if(post){ %>
+  <div id="nav">
+    <ul>
+      <li><u><b><a href="../a">/a/</a></b></u></li>
+      <li><u><b><a href="../b">/b/</a></b></u></li>
+      <li><u><b><a href="../pol">/pol/</a></b></u></li>
+    </ul>
+  </div>
+  <% }else{ %>
+  <div id="nav">
+    <ul>
+      <li><u><b><a href="a" id='aLink'>/a/</a></b></u></li>
+      <li><u><b><a href="b" id='bLink'>/b/</a></b></u></li>
+      <li><u><b><a href="pol" id='polLink'>/pol/</a></b></u></li>
+    </ul>
+  </div>
+  <% } %>
+  <h1><a id="title" href="/">TempleChan</a></h1>
+
+  <!-- top nav link ajax script -->
+  <script>
+    $(document).ready(function(){
+        /*var onLoadURL = window.location.pathname;
+        var cleanURL = onLoadURL.substring(1);
+        console.log(onLoadURL);
+        if(onLoadURL == '/'){
+          history.replaceState({goHome:true},null, '/');
+        }else if(cleanURL == 'a' || clearnURL == 'b' || cleanURL =='pol'){
+          history.replaceState({boardURL:cleanURL},null, cleanURL);
+        }else{
+          var boardValue = cleanURL.substring(0,cleanURL.indexOf('/'));
+          history.replaceState({threadURL:cleanURL,threadBoard:boardValue},null,cleanURL);
+        }*/
+
+            window.addEventListener('popstate', function(event){
+
+                /*if(event.state.goHome){
+                  window.location = "localhost:3000";
+                }*/
+
+                if(event.state.threadURL){
+                  var threadURL = event.state.threadURL
+                  $('.changeBody').html('');
+                  $('.changeBody').append(`
+                      <div id='banner'>
+                          <img src='../public/images/banner1.jpg' height='233' width='477' style='margin-top: 7px;'>
+                      </div>
+
+                      <div id='boardTitle'>
+                          <h2 id='headerText' style='margin-bottom:3px;'>/${event.state.threadBoard}/</h2>
+                      </div>
+                      <hr class='belowTitle'>
+                      <div id='formContainer'>
+                          <h2 id='makePost'>[POST]</h2>
+                      </div>
+                      <hr>
+                  `);
+                  $.ajax({
+                      url: '../' + threadURL + '-',
+                      type: 'GET',
+                      dataType: 'json',
+                      success: function(daten){
+
+                          var OPname = daten.thread[0].name;
+                          var OPoptions = daten.thread[0].options;
+                          var OPimage = daten.thread[0].image;
+                          var OPsubject = daten.thread[0].subject;
+                          var OPcomment = daten.thread[0].comment;
+                          var OPtimestamp = daten.thread[0].timestamp;
+                          var OPpostNumber = daten.thread[0].postNumber;
+                          var threadTheme = daten.thread[0].music;
+
+                          $('.changeBody').append("<a id='topArrow' href='#top'>▲</a><a id='bottomArrow' href='#bottom'>▼</a>");
+
+                          if(threadTheme){
+                              $('.changeBody').append(`
+                                  <div class='wrapperPost'>
+                                      <div class='post'>
+                                          <div class='header'>
+                                              <p class='headerRight'><font color='#b72d2d' size='4'><b>${OPsubject}</b></font>&nbsp;&nbsp;<font color='#2d8932' size='4'><b>${OPname}</b></font>&nbsp;&nbsp;${OPtimestamp}</p><p id='${OPpostNumber}'><a class='postNumb'>${OPpostNumber}</a><a class='postNumb'>>></a></p><br>
+                                              <p class='optionsLeft'>${OPoptions}</p>
+                                          </div>
+                                          <div class='header2'>
+
+                                          </div>
+                                          <div class='content'>
+                                              <a href='../public/images/${OPimage}' target='_blank'>
+                                              <img id='threadImg' align='left' src='../public/images/${OPimage}'>
+                                              </a>
+                                              <div class='textArea' align='left'>${OPcomment}</div>
+                                          </div>
+                                          <div class='repliesFooter'>
+
+                                          </div>
+                                          <button id='threadTheme' style='margin-top:14px;'>Play ThreadTheme</button>
+                                      </div>
+                                  </div>
+                                  <br>
+                                  <div id='replyChange'></div>
+                              `);
+                              var tag = document.createElement("script");
+                              tag.innerHTML=`
+                                  $('#threadTheme').on('click',function(){
+                                      $('#audsrc').attr('src','../public/images/${threadTheme}');
+
+                                      var audio = $('#audio');
+
+                                      audio[0].pause();
+                                      audio[0].load();
+                                      audio[0].play();
+                                  });
+                              `;
+                              $('body').append(tag);
+                          }else{
+                              $('.changeBody').append(`
+                                  <div class='wrapperPost'>
+                                      <div class='post'>
+                                          <div class='header'>
+                                              <p class='headerRight'><font color='#b72d2d' size='4'><b>${OPsubject}</b></font>&nbsp;&nbsp;<font color='#2d8932' size='4'><b>${OPname}</b></font>&nbsp;&nbsp;${OPtimestamp}</p><p id='${OPpostNumber}'><a class='postNumb'>${OPpostNumber}</a><a class='postNumb'>>></a></p><br>
+                                              <p class='optionsLeft'>${OPoptions}</p>
+                                          </div>
+                                          <div class='header2'>
+
+                                          </div>
+                                          <div class='content'>
+                                              <a href='../public/images/${OPimage}' target='_blank'>
+                                              <img align='left' id='threadImg' src='../public/images/${OPimage}'>
+                                              </a>
+                                              <div class='textArea' align='left'>${OPcomment}</div>
+                                          </div>
+                                          <div class='repliesFooter'>
+
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <br>
+                                  <div id='replyChange'></div>
+                                  <a id='update' href='#'><p style="text-align:center;font-size:1.3em;margin:0;">&nbsp;&nbsp;[UPDATE]</p></a>
+                              `);
+                          }
+
+
+                          daten.replies.forEach(function(reply){
+                              var replyName = reply.name;
+                              var replyOptions = reply.options;
+                              var replyImage = reply.image;
+                              var replySubject = reply.subject;
+                              var replyComment = reply.comment;
+                              var replyTimestamp = reply.timestamp;
+                              var replyPostNumber = reply.postNumber;
+                              var replyReplies = reply.replies;
+
+                              var repliesString = "";
+                              for(i=0;i<replyReplies.length;i++){
+                                  repliesString = repliesString + "<font size='-1'><a id='replyLink' href='#"+replyReplies[i]+"'>>>"+replyReplies[i]+"</a></font> ";
+                              }
+
+                              if(replyImage){
+                                  $('#replyChange').append(`
+                                      <div class='wrapperPostR'>
+                                          <div class='postR' id='${replyPostNumber}css'>
+                                              <div class='header'>
+                                                  <p class='headerRight'><font color='#2d8932' size='4'><b>${replyName}</b></font> ${replyTimestamp}</p><p class='replyPostNumb' id=${replyPostNumber}><a class='postNumb'>>>${replyPostNumber}</a></p><br>
+                                                  <p class='optionsLeft'>${replyOptions}</p>
+                                              </div>
+                                              <div class='header2'>
+
+                                              </div>
+                                              <div class='content' id='replyContent'>
+                                                  <a href='../public/images/${replyImage}' target='_blank'>
+                                                      <img align='left' id='threadImg' src='../public/images/${replyImage}'>
+                                                  </a>
+                                                  <div class='textArea' align='left'>${replyComment}</div>
+                                              </div>
+                                              <div class='repliesFooter'>
+                                                  ${repliesString}
+                                              </div>
+                                          </div>
+                                      </div>
+                                      <br>
+                                  `);
+                              }else{
+                                  $('#replyChange').append(`
+                                      <div class='wrapperPostR'>
+                                          <div class='postR' id='${replyPostNumber}css'>
+                                              <div class='header'>
+                                                  <p class='headerRight'><font color='#2d8932' size='4'><b>${replyName}</b></font> ${replyTimestamp}</p><p class='replyPostNumb' id=${replyPostNumber}><a class='postNumb'>>>${replyPostNumber}</a></p><br>
+                                                  <p class='optionsLeft'>${replyOptions}</p>
+                                              </div>
+                                              <div class='header2'>
+
+                                              </div>
+                                              <div class='content' id='replyContent'>
+                                                  <div class='textArea' align='left'>${replyComment}</div>
+                                              </div>
+                                              <div class='repliesFooter'>
+                                                  ${repliesString}
+                                              </div>
+                                          </div>
+                                      </div>
+                                      <br>
+                                  `);
+
+                              }
+                          });
+                      }
+                  });
+
+                }else if(event.state.boardURL){
+                  console.log('board stream fired');
+                  $('.changeBody').html('');
+                  $('.changeBody').append(`
+                      <div id='banner'>
+                          <img src='public/images/banner1.jpg' height='233' width='477' style='margin-top: 7px;'>
+                      </div>
+
+                      <div id='boardTitle'>
+                          <h2 id='headerText' style='margin-bottom:3px;'>/${event.state.boardURL}/</h2>
+                      </div>
+                      <hr class='belowTitle'>
+                      <div id='formContainer'>
+                          <h2 id='makePost'>[POST]</h2>
+                      </div>
+                      <hr>
+                  `);
+
+                  $('.changeBody').append("<div id='catalogGrid'></div>");
+                  $.ajax({
+                    url: event.state.boardURL + '-',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(daten){
+                        daten.thumbnails.forEach(function(posting){
+                            var boardValue = posting.board;
+                            var postNumberVal = posting.postNumber;
+                            var imageVal = posting.image;
+                            var subjectVal = posting.subject;
+                            var commentVal = posting.comment;
+
+
+                            $('#catalogGrid').append(`
+                                    <a href='${boardValue}/${postNumberVal}'>
+                                        <div id='thumbnail'>
+                                            <img src='public/images/${imageVal}' class='thumbnailImg'>
+                                            <b>${subjectVal}</b>
+                                            <p>${commentVal}</p>
+                                        </div>
+                                    </a>
+                            `);
+                        });
+                    },
+                    error: function(error) {
+                      console.log("error===",error);
+                      //Do Something to handle error
+                    }
+                  });
+                }
+                
+            });
+
+            var boardVal;
+            var postNumberVal;
+            var imageVal;
+            var subjectVal;
+            var commentVal;
+
+
+            $('div#nav').find('a').on('click',function(e){
+                $('.popupForm').css('display','none');
+                $('#comment').val('');
+                //boardVal could either have a ../ or not we need to convert it to a regular boardval if it has a ../
+                boardVal = $(this).attr('href');
+
+                var dotDetector = boardVal.lastIndexOf('./');
+                //if true then we have ../ links
+                if(dotDetector >= 1){
+                    boardVal = boardVal.substring(dotDetector+2);
+                }
+
+                var cleanTitle = boardVal;
+
+                var imgPath = 'public/images/banner1.jpg';
+                var thatPath = window.location.pathname;
+                    var threadDetector = thatPath.indexOf('/',1);
+                    if(threadDetector >= 1){
+                        boardVal = '../'+boardVal;
+                        imgPath = '../'+imgPath;
+                    }
+
+
+                e.preventDefault();
+                $('.changeBody').html('');
+                $('.changeBody').append(`
+                    <div id='banner'>
+                        <img src='${imgPath}' height='233' width='477' style='margin-top: 7px;'>
+                    </div>
+
+                    <div id='boardTitle'>
+                        <h2 id='headerText' style='margin-bottom:3px;'>/${cleanTitle}/</h2>
+                    </div>
+                    <hr class='belowTitle'>
+                    <div id='formContainer'>
+                        <h2 id='makePost'>[POST]</h2>
+                    </div>
+                    <hr>
+                `);
+
+                $('.changeBody').append("<div id='catalogGrid'></div>");
+
+                $.ajax({
+                    url: boardVal + '-',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(daten){
+                        window.history.pushState({boardURL:cleanTitle},null,boardVal);
+
+                        daten.thumbnails.forEach(function(posting){
+                            postNumberVal = posting.postNumber;
+                            imageVal = posting.image;
+                            subjectVal = posting.subject;
+                            commentVal = posting.comment;
+
+
+                            $('#catalogGrid').append(`
+                                    <a href='${boardVal}/${postNumberVal}'>
+                                        <div id='thumbnail'>
+                                            <img src='public/images/${imageVal}' class='thumbnailImg'>
+                                            <b>${subjectVal}</b>
+                                            <p>${commentVal}</p>
+                                        </div>
+                                    </a>
+                            `);
+                        });
+                    },
+                    error: function(error) {
+                      console.log("error===",error);
+                      //Do Something to handle error
+                    }
+                });
+            });
+
+        });
+    </script>
+  <!-- end of top nav ajax script -->
+
+  <script>
+    $(document).ready(function(){
+        $('body').on('click','a#replyLink',function(){
+            var IDval = $(this).attr('href');
+            $('.postR').css('background','#deffef');
+            $(`${IDval}css`).css('background','#F2D1CE');
+        });
+    });
+    </script>
+
+  <!-- posting form script -->
+  <script>
+
+    is_validate = false
+
+    function getCaptcha(dom,type) {
+      console.log("getCaptcha======",dom, type);
+
+      dom.children().remove()
+
+      $.ajax({
+          url: "/captcha/create",
+          type: "get", //send it through get method
+          // data: {
+          //   ajaxid: 4,
+          //   UserID: UserID,
+          //   EmailAddress: EmailAddress
+          // },
+          success: function(response) {
+
+            // var d = response.ownerDocument;
+            var response_html = response.documentElement;
+            //Do Something
+            console.log(response);
+             // $('#svg').append(response_html)
+             dom.append(response_html)
+             dom.append( `
+             <div id='captchaButtons'>
+                <button type="button" onClick="getCaptcha($('#${type}'),'${type}')">Refresh Captcha</button>
+                <input type="button" id="captcha_submit" onClick="validateCaptcha($('#${type}'),'${type}')" value="validate" />
+              </div>
+              <input type='text' id='captcha_text' name='captcha'/>
+             <input class='submit' name='submit' type='submit' value='submit'>
+             `)
+          },
+          error: function(error) {
+            console.log("get error====",error);
+
+            //Do Something to handle error
+          }
+      });
+    }
+
+
+    function validateCaptcha(local_dom,type) {
+      console.log("validateCaptcha===",local_dom,type);
+      // let local_dom = $('#svg')
+      let text_local = $('#captcha_text').val()
+      // if (!is_svg) {
+      //   local_dom = $('#comment') //#comment
+      // }
+      if (!text_local) {
+        alert("Empty Captcha")
+        return false
+      }
+      $.ajax({
+          url: "/captcha/check/" +  text_local,
+          type: "get", //send it through get method
+          // data: {
+          //   text: $('#captcha_text').val()
+          // },
+          success: function(response) {
+            console.log("response validateCaptcha=====",response);
+            // {"error":false,"message":"Succes"}
+            if (response && response.error) {
+              alert(response.message)
+              getCaptcha(local_dom,type)
+            }else {
+              console.log("called====refreshDomPath=====");
+              refreshDomPath(local_dom)
+              is_validate = true
+            }
+          },
+          error: function(error) {
+            console.log("get error====",error);
+
+            //Do Something to handle error
+          }
+      });
+    }
+    function refreshDomPath(dom) {
+      console.log("refreshDomPath=====",dom);
+      dom.children().remove();
+      dom.append("<input class='submit' name='submit' type='submit' value='submit' style='height:55px;width:155px'>");
+    }
+
+    $(document).ready(function(){
+
+        $('body').on('click','h2#makePost',function(){
+            var formPath = window.location.pathname;
+                var cutPath = formPath.indexOf('/',1);
+                if(cutPath >= 1){
+                    var Type = 'reply';
+                }
+            $('#formContainer').html('');
+            if(Type == 'reply'){
+                $('#formContainer').html(`
+                    <form action='/post' method='POST' enctype='multipart/form-data' id="form_data_main" class='ajaxForm'>
+                        <div class='formGrid'>
+                            <label class='standard' name='nameL'>Name</label>
+                            <input type='text' name='name' placeholder='Anonymous' id='name'>
+                            <label class='standard'name='optionsL'>Options</label>
+                            <input type='text' name='options' id='options'>
+                            <label class='standard' name='imageL'>Image</label>
+                            <input type='file' name='image'>
+                        </div>
+
+                        <div class='formGrid'>
+                            <label class='comment' name='commentL'>Comment</label>
+                            <textarea class='textArea' rows='4' cols='50' name='comment' id='comment'></textarea>
+
+                            <div>
+                              <div id="svg">
+                                
+                              </div>
+                        
+                              <div>
+                                  <p id='hide'>[HIDE]</p>
+                              </div>
+                            </div>
+
+                        </div>
+                    </form>
+                `);
+                //getCaptcha
+                getCaptcha($('#svg'),"svg")
+            }else{
+
+
+              $('#formContainer').html(`
+                  <form action='/post' method='POST' enctype='multipart/form-data' id="form_data_main" class='ajaxForm'>
+                      <div class='formGrid'>
+                          <label class='standard' name='nameL'>Name</label>
+                          <input type='text' name='name' placeholder='Anonymous' id='name'>
+                          <label class='standard'name='optionsL'>Options</label>
+                          <input type='text' name='options' id='options'>
+                          <label class='standard' name='subjectL'>Subject</label>
+                          <input type='text' name='subject' id='subject'>
+                          <label class='standard' name='imageL'>Image</label>
+                          <input type='file' name='image'>
+                      </div>
+
+
+
+                      <div class='formGrid'>
+                          <label class='comment' name='commentL'>Comment</label>
+                          <textarea class='textArea' rows='4' cols='50' name='comment' id='comment'></textarea>
+                          <label class='standard' name='musicL'>Music</label>
+                          <input type='file' name='music'>
+
+                        <div>
+                          <div id="svg">
+
+                          </div>
+
+                          <div>
+                              <p id='hide'>[HIDE]</p>
+                          </div>
+                        </div>
+
+
+                      </div>
+                  </form>
+              `);
+
+              //getCaptcha
+              getCaptcha($('#svg'),"svg")
+            }
+
+            var tag = document.createElement("script");
+            tag.innerHTML=`
+                $(document).ready(function(){
+                    $('form.ajaxForm').submit(function(e){
+                      console.log("ajaxForm form1111 submitted======")
+                        e.preventDefault();
+                        //stops the form from being submitted normally
+
+                        //these 3 lines are important
+                        var thatPath = window.location.pathname;
+                        var formData = new FormData($('#form_data_main')[0]);
+                        formData.append('path', thatPath);
+
+                        //these commented lines are other way of doing which u used previously.
+                        // thus i had implemented the #id to get whole form.
+                        // see above new formdata declaration line in code.
+
+                        // var thatName = $('#name').val();
+                        // var thatOptions = $('#options').val();
+                        // var thatSubject = $('#subject').val();
+                        // var thatComment = $('#comment').val();
+                        // formData.append('name', thatName);
+                        // formData.append('options', thatOptions);
+                        // formData.append('subject', thatSubject);
+                        // formData.append('comment', thatComment);
+
+                        if (!is_validate) {
+                          console.log("is_validate===1111",is_validate)
+                          alert("Invalid User.Plz Validate Captcha")
+                          return false
+                        }
+
+                        $.ajax({
+                            url: '/post',
+                            type: 'POST',
+                            data: formData,
+                            enctype: 'multipart/form-data',
+                            processData: false,
+                            contentType:false,
+                            success: function(response){
+                                $('#formContainer').html('');
+                                $('#formContainer').html("<h2 id='makePost'>[POST]</h2>");
+
+                                //refreshing
+                                is_validate = false
+                                console.log("rrrrrrrrrrrr=====================",response);
+                                if (response && response.error) {
+                                  console.log("xxxxxxxxxxxxxxxx",response);
+                                  alert(response.message+"hi")
+                                  return false
+                                }
+
+                                if(response.type == 'post'){
+                                    $('#catalogGrid').html('');
+                                    console.log("response.thumbnails 111111====",response,response.thumbnails);
+
+                                    response.thumbnails.forEach(function(posting){
+                                        var postNumberVal = posting.postNumber;
+                                        var imageVal = posting.image;
+                                        var subjectVal = posting.subject;
+                                        var commentVal = posting.comment;
+                                        var boardVal = posting.board;
+                                        console.log('thumbnail printed');
+
+                                            $('#catalogGrid').append("<a href='"+boardVal+"/"+postNumberVal+"'><div id='thumbnail'><img src='public/images/"+imageVal+"' class='thumbnailImg'><b>"+subjectVal+"</b><p>"+commentVal+"</p></div></a>");
+
+
+                                    });
+                                }else if(response.type == 'reply'){
+                                    $('#replyChange').html('');
+
+                                    response.replies.forEach(function(reply){
+                                        var replyName = reply.name;
+                                        var replyOptions = reply.options;
+                                        var replyImage = reply.image;
+                                        var replySubject = reply.subject;
+                                        var replyComment = reply.comment;
+                                        var replyTimestamp = reply.timestamp
+                                        var replyPostNumber = reply.postNumber;
+                                        var replyReplies = reply.replies;
+
+                                        var repliesString = "";
+                                        for(i=0;i<replyReplies.length;i++){
+                                            repliesString = repliesString+"<font size='-1'><a id='replyLink' href='#"+replyReplies[i]+"'>>>"+replyReplies[i]+"</a></font> ";
+                                        }
+
+                                        if(replyImage){
+                                            $('#replyChange').append("<div class='wrapperPostR'><div class='postR' id='"+replyPostNumber+"css'><div class='header'><p class='headerRight'><font color='#2d8932' size='4'><b>"+replyName+"</b></font> "+replyTimestamp+"</p><p class='replyPostNumb' id='"+replyPostNumber+"'><a class='postNumb'>>>"+replyPostNumber+"</a></p><br><p class='optionsLeft'>"+replyOptions+"</p></div><div class='header2'></div><div class='content' id='replyContent'><a href='../public/images/"+replyImage+"' target='_blank'><img id='threadImg' align='left' src='../public/images/"+replyImage+"'></a><div class='textArea' align='left'>"+replyComment+"</div></div><div class='repliesFooter'>"+repliesString+"</div></div></div><br>");
+                                        }else{
+                                            $('#replyChange').append("<div class='wrapperPostR'><div class='postR' id='"+replyPostNumber+"css'><div class='header'><p class='headerRight'><font color='#2d8932' size='4'><b>"+replyName+"</b></font> "+replyTimestamp+"</p><p class='replyPostNumb' id='"+replyPostNumber+"'><a class='postNumb'>>>"+replyPostNumber+"</a></p><br><p class='optionsLeft'>"+replyOptions+"</p></div><div class='header2'></div><div class='content' id='replyContent'><div class='textArea' align='left'>"+replyComment+"</div></div><div class='repliesFooter'>"+repliesString+"</div></div></div><br>");
+                                        }
+                                    });
+                                }
+
+
+                            }
+                        });
+                    });
+                    $('body').on('click','p#hide',function(){
+                        $('#formContainer').html('');
+                        $('#formContainer').html("<h2 id='makePost'>[POST]</h2>");
+                    });
+                });
+            `;
+            $('body').append(tag);
+
+        });
+    });
+    </script>
+  <!-- end of posting form script -->
+
+  <!-- threadPage ajax loading script -->
+  <script>
+    $(document).ready(function(){
+            $('body').on('click', '#catalogGrid a', function(e){
+                e.preventDefault();
+                var URLval = $(this).attr('href');
+                    var dotDetector = URLval.lastIndexOf('./');
+                //if true then we have ../
+                if(dotDetector >= 1){
+                    URLval = URLval.substring(dotDetector+2);
+                }
+                    var URLcut = URLval.indexOf('/');
+                var Board = URLval.substring(0,URLcut);
+                var Post = URLval.substring(URLcut+1);
+
+
+                $('.changeBody').html('');
+                $('.changeBody').append(`
+                    <div id='banner'>
+                        <img src='public/images/banner1.jpg' height='233' width='477' style='margin-top: 7px;'>
+                    </div>
+
+                    <div id='boardTitle'>
+                        <h2 id='headerText' style='margin-bottom:3px;'>/${Board}/</h2>
+                    </div>
+                    <hr class='belowTitle'>
+                    <div id='formContainer'>
+                        <h2 id='makePost'>[POST]</h2>
+                    </div>
+                    <hr>
+                `);
+                console.log(URLval);
+                $.ajax({
+                    url: URLval + '-',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(daten){
+
+                        window.history.pushState({threadURL:URLval,threadBoard:Board},null,URLval);
+                        var OPname = daten.thread[0].name;
+                        var OPoptions = daten.thread[0].options;
+                        var OPimage = daten.thread[0].image;
+                        var OPsubject = daten.thread[0].subject;
+                        var OPcomment = daten.thread[0].comment;
+                        var OPtimestamp = daten.thread[0].timestamp;
+                        var OPpostNumber = daten.thread[0].postNumber;
+                        var threadTheme = daten.thread[0].music;
+
+                        $('.changeBody').append("<a id='topArrow' href='#top'>▲</a><a id='bottomArrow' href='#bottom'>▼</a>");
+
+                        if(threadTheme){
+                            $('.changeBody').append(`
+                                <div class='wrapperPost'>
+                                    <div class='post'>
+                                        <div class='header'>
+                                            <p class='headerRight'><font color='#b72d2d' size='4'><b>${OPsubject}</b></font>&nbsp;&nbsp;<font color='#2d8932' size='4'><b>${OPname}</b></font>&nbsp;&nbsp;${OPtimestamp}</p><p id='${OPpostNumber}'><a class='postNumb'>${OPpostNumber}</a><a class='postNumb'>>></a></p><br>
+                                            <p class='optionsLeft'>${OPoptions}</p>
+                                        </div>
+                                        <div class='header2'>
+
+                                        </div>
+                                        <div class='content'>
+                                            <a href='../public/images/${OPimage}' target='_blank'>
+                                            <img id='threadImg' align='left' src='../public/images/${OPimage}'>
+                                            </a>
+                                            <div class='textArea' align='left'>${OPcomment}</div>
+                                        </div>
+                                        <div class='repliesFooter'>
+
+                                        </div>
+                                        <button id='threadTheme' style='margin-top:14px;'>Play ThreadTheme</button>
+                                    </div>
+                                </div>
+                                <br>
+                                <div id='replyChange'></div>
+                            `);
+                            var tag = document.createElement("script");
+                            tag.innerHTML=`
+                                $('#threadTheme').on('click',function(){
+                                    $('#audsrc').attr('src','../public/images/${threadTheme}');
+
+                                    var audio = $('#audio');
+
+                                    audio[0].pause();
+                                    audio[0].load();
+                                    audio[0].play();
+                                });
+                            `;
+                            $('body').append(tag);
+                        }else{
+                            $('.changeBody').append(`
+                                <div class='wrapperPost'>
+                                    <div class='post'>
+                                        <div class='header'>
+                                            <p class='headerRight'><font color='#b72d2d' size='4'><b>${OPsubject}</b></font>&nbsp;&nbsp;<font color='#2d8932' size='4'><b>${OPname}</b></font>&nbsp;&nbsp;${OPtimestamp}</p><p id='${OPpostNumber}'><a class='postNumb'>${OPpostNumber}</a><a class='postNumb'>>></a></p><br>
+                                            <p class='optionsLeft'>${OPoptions}</p>
+                                        </div>
+                                        <div class='header2'>
+
+                                        </div>
+                                        <div class='content'>
+                                            <a href='../public/images/${OPimage}' target='_blank'>
+                                            <img align='left' id='threadImg' src='../public/images/${OPimage}'>
+                                            </a>
+                                            <div class='textArea' align='left'>${OPcomment}</div>
+                                        </div>
+                                        <div class='repliesFooter'>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <div id='replyChange'></div>
+                                <a id='update' href='#'><p style="text-align:center;font-size:1.3em;margin:0;">&nbsp;&nbsp;[UPDATE]</p></a>
+                            `);
+                        }
+
+                        console.log("daten.replies 22222222====",daten,daten.replies);
+
+                        daten.replies.forEach(function(reply){
+                            var replyName = reply.name;
+                            var replyOptions = reply.options;
+                            var replyImage = reply.image;
+                            var replySubject = reply.subject;
+                            var replyComment = reply.comment;
+                            var replyTimestamp = reply.timestamp;
+                            var replyPostNumber = reply.postNumber;
+                            var replyReplies = reply.replies;
+
+                            var repliesString = "";
+                            for(i=0;i<replyReplies.length;i++){
+                                repliesString = repliesString + "<font size='-1'><a id='replyLink' href='#"+replyReplies[i]+"'>>>"+replyReplies[i]+"</a></font> ";
+                            }
+
+                            if(replyImage){
+                                $('#replyChange').append(`
+                                    <div class='wrapperPostR'>
+                                        <div class='postR' id='${replyPostNumber}css'>
+                                            <div class='header'>
+                                                <p class='headerRight'><font color='#2d8932' size='4'><b>${replyName}</b></font> ${replyTimestamp}</p><p class='replyPostNumb' id=${replyPostNumber}><a class='postNumb'>>>${replyPostNumber}</a></p><br>
+                                                <p class='optionsLeft'>${replyOptions}</p>
+                                            </div>
+                                            <div class='header2'>
+
+                                            </div>
+                                            <div class='content' id='replyContent'>
+                                                <a href='../public/images/${replyImage}' target='_blank'>
+                                                    <img align='left' id='threadImg' src='../public/images/${replyImage}'>
+                                                </a>
+                                                <div class='textArea' align='left'>${replyComment}</div>
+                                            </div>
+                                            <div class='repliesFooter'>
+                                                ${repliesString}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br>
+                                `);
+                            }else{
+                                $('#replyChange').append(`
+                                    <div class='wrapperPostR'>
+                                        <div class='postR' id='${replyPostNumber}css'>
+                                            <div class='header'>
+                                                <p class='headerRight'><font color='#2d8932' size='4'><b>${replyName}</b></font> ${replyTimestamp}</p><p class='replyPostNumb' id=${replyPostNumber}><a class='postNumb'>>>${replyPostNumber}</a></p><br>
+                                                <p class='optionsLeft'>${replyOptions}</p>
+                                            </div>
+                                            <div class='header2'>
+
+                                            </div>
+                                            <div class='content' id='replyContent'>
+                                                <div class='textArea' align='left'>${replyComment}</div>
+                                            </div>
+                                            <div class='repliesFooter'>
+                                                ${repliesString}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br>
+                                `);
+
+                            }
+                        });
+                    }
+                });
+            });
+        })
+    </script>
+  <!-- end of threadPage ajax loading script -->
+
+  <div class='changeBody'>
+
+
+    <% if(title){ %>
+    <% if(!post){ %>
+    <div id="banner">
+      <img src="public/images/banner1.jpg" height="233" width="477" style='margin-top: 7px;'>
+    </div>
+    <% }else{ %>
+    <div id="banner">
+      <img src="../public/images/banner1.jpg" height="233" width="477" style='margin-top: 7px;'>
+    </div>
+    <% } %>
+
+    <!-- <hr class="aboveTitle"> -->
+    <div id="boardTitle">
+            <h2 id='headerText' style='margin-bottom:3px;'>/<%= title %>/</h2>
+        </div>
+        <hr class="belowTitle">
+        <div id='formContainer'>
+            <h2 id='makePost'>[POST]</h2>
+        </div>
+        <hr>
+
+        <% if(thumbnails){ %>
+            <div id='catalogGrid'>
+                <% for(var i=0; i<thumbnails.length; i++){ %>
+                    <a href='<%= title %>/<%= thumbnails[i].postNumber %>'>
+                        <div id='thumbnail'>
+                            <img src='public/images/<%= thumbnails[i].image %>' class='thumbnailImg'>
+                            <b><%= thumbnails[i].subject %></b>
+                            <p><%= thumbnails[i].comment %></p>
+                        </div>
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+        <% if(post){ %>
+        
+        <a id='topArrow' href='#top'>▲</a><a id='bottomArrow' href='#bottom'>▼</a>
+    
+            <div class='wrapperPost'>
+                <div class='post'>
+                    <div class='header'>
+                        <p class='headerRight'><font color='#b72d2d' size='4'><b><%= post[0].subject %></b></font>&nbsp;&nbsp;<font color='#2d8932' size='4'><b><%= post[0].name %></b></font>&nbsp;&nbsp;<%= post[0].timestamp %></p><p id='<%= post[0].postNumber %>'><a class='postNumb'><%= post[0].postNumber %></a><a class='postNumb'>>></a></p><br>
+                        <p class='optionsLeft'><%= post[0].options %></p>
+                    </div>
+                    <div class='header2'>
+
+                    </div>
+                    <div class='content'>
+                        <a href='../public/images/<%= post[0].image %>' target='_blank'>
+                        <img align='left' id='threadImg' src='../public/images/<%= post[0].image %>'>
+                        </a>
+                        <div class='textArea' align='left'><%= post[0].comment %></div>
+                    </div>
+                    <div class='repliesFooter'>
+                        
+                    </div>
+                    <% if(post[0].music){ %>
+                        <button id='threadTheme' style='margin-top:14px;'>Play ThreadTheme</button>
+                        <script>
+                            $('#threadTheme').on('click',function(){
+                                $('#audsrc').attr('src','../public/images/<%= post[0].music %>');
+
+                                var audio = $('#audio');
+
+                                audio[0].pause();
+                                audio[0].load();
+                                audio[0].play();
+                            });
+                        </script>
+                    <% } %>
+                </div>
+            </div>
+            <br>
+            <% if(replies){ %>
+            <div id='replyChange'>
+                <% for(var i=0;i<replies.length;i++){ %>
+                    <% if(replies[i].image){ %>
+                        <div class='wrapperPostR'>
+                            <div class='postR' id='<%= replies[i].postNumber %>css'>
+                                <div class='header'>
+                                    <p class='headerRight'><font color='#2d8932' size='4'><b><%= replies[i].name %></b></font> <%= replies[i].timestamp %></p><p class='replyPostNumb' id='<%= replies[i].postNumber %>'><a class='postNumb'>>><%= replies[i].postNumber %></a></p><br>
+                                    <p class='optionsLeft'><%= replies[i].options %></p>
+                                </div>
+                                <div class='header2'>
+
+                                </div>
+                                <div class='content' id='replyContent'>
+                                    <a href='../public/images/<%= replies[i].image %>' target='_blank'>
+                                        <img id='threadImg' align='left' src='../public/images/<%= replies[i].image %>'>
+                                    </a>
+                                    <div class='textArea' align='left'><%- replies[i].comment %></div>
+                                </div>
+                                <div class='repliesFooter'>
+                                    <% for(var u=0;u<replies[i].replies.length;u++){ %>
+                                        <font size='-1'><a id='replyLink' href='#<%= replies[i].replies[u] %>'>
+                                            >><%= replies[i].replies[u] %>
+                                        </a></font>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                    <% }else{ %>
+                        <div class='wrapperPostR'>
+                            <div class='postR' id='<%= replies[i].postNumber %>css'>
+                                <div class='header'>
+                                    <p class='headerRight'><font color='#2d8932' size='4'><b><%= replies[i].name %></b></font> <%= replies[i].timestamp %></p><p class='replyPostNumb' id='<%= replies[i].postNumber %>'><a class='postNumb'>>><%= replies[i].postNumber %></a></p><br>
+                                    <p class='optionsLeft'><%= replies[i].options %></p>
+                                </div>
+                                <div class='header2'>
+
+                                </div>
+                                <div class='content' id='replyContent'>
+                                    <div class='textArea' align='left'><%- replies[i].comment %></div>
+                                </div>
+                                <div class='repliesFooter'>
+                                    <% for(var u=0;u<replies[i].replies.length;u++){ %>
+                                        <font size='-1'><a id='replyLink' href='#<%= replies[i].replies[u] %>'>
+                                            >><%= replies[i].replies[u] %>
+                                        </a></font>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                    <% } %>
+                <% } %>
+            </div>
+            <% } %>
+            <a id='update' href='#'><p style="text-align:center;font-size:1.3em;margin:0;">&nbsp;&nbsp;[UPDATE]</p></a>
+        <% } %>
+        <!-- end of if(post)-->
+    <% }else{ %>
+
+    <div class='imgLogo' style="display:flex;align-items: center;justify-content:center;margin-top:10px;padding:0px;margin-bottom:0px;">
+        <img src='public/images/logo.gif' width="700px" style="">
+    </div>
+    <div class=creedoWrapper>
+    <div class="creedo">
+        Welcome to TempleChan<br><br>
+
+TempleChan is an anonymous imageboard similar to 4chan where users can create and reply to threads.<br><br>
+
+The motivating factor behind creating TempleChan was protecting and cultivating freedom of speech. True freedom of speech. Which doesn't just mean allowing people to post freely but also protecting zones where more taboo subjects are being discussed. <br><br>
+
+Specifically, /pol/, or the politically incorrect board, which has been infiltrated by paid interest groups and their seemingly infinite number of lackeys, use divide and conquer strategies with the objective to skew discussion, create chaos, muddy ideas, and instill unbridled hatred amongst people simply trying to find truth. By doing this, we believe that these paid interest groups are impeding on /pol/'s freedom of speech and we at TempleChan are dedicated to protecting the speech and the more important ideas of /pol/. <br><br>
+
+What /pol/ has brought to light in the recent years regarding the secrecy, corruption, and wickedness of the elite has been shocking and the importance of protecting an area where people are freely allowed to talk about these issues is NECESSARY for any society that wishes to further improve itself. The media has failed us and it is up to all of us, neigh, our duty, to expose this evil plot to the people and energize them to take their governments back from corrupt politicians, globalist corporations, and the international banking cartel. <br><br>
+
+While the other boards on TempleChan are still important the importance of /pol/'s role in our society CANNOT be understated. What /pol/ needs more than anything right now is a community that understands the movement and the enemy and is imbued with the ideals of justice and transparency within our higher institutions. <br><br>
+
+
+    </div>
+    </div>
+
+
+<p align='center' style='font-size: 3em'>✞</p>
+
+
+    <% } %>
+</div>
+
+<b style='text-align:center;color:#8BEDFA;' id='bottom'>“However, the Most High does not dwell in temples made with hands, as the prophet says:
+Heaven is my throne, and earth is my footstool: what house will ye build me? saith the Lord: or what is the place of my rest?
+Hath not my hand made all these things?”</b>
+
+<br>
+<br>
+<br>
+
+<div  style="display: flex;justify-content: center;align-items: center;">
+    <audio id='audio' controls autoplay style="width:777px;position:fixed;bottom:0px;">
+        <source id='audsrc' src='public/Rise.mp3' type='audio/mpeg'>
+    </audio>
+</div>
+</body>
+
+</html>

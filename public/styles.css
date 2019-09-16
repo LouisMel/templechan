@@ -1,0 +1,432 @@
+*{
+	font-family: Verdana, Geneva, sans-serif;
+}
+#title{
+    color: #A70B0B;
+    text-decoration: none;
+}
+
+a{
+    text-decoration: none;
+    color:#154DA4;
+}
+
+a:visited{color:#154DA4;}
+
+body{
+	background-color: #8BEDFA;
+}
+
+h1{
+	margin-top: 0px;
+	margin-bottom:0px;
+	color: #A70B0B;
+	font-family: Verdana, Geneva, sans-serif;
+	text-align: center;
+	font-size: 55px;
+}
+
+h2{
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+#startThread{
+    text-align: center;
+    font-size:22px;
+}
+
+
+#nav { 
+	text-align: center;
+	margin-bottom: 0px;
+}
+#nav ul { 
+	list-style: none;
+	margin-bottom:0px; 
+}
+#nav ul li { 
+	display: inline;
+	font-size: 22px; 
+}
+
+#boardTitle h2{
+	color: #A70B0B;
+	font-family: Verdana, Geneva, sans-serif;
+	text-align: center;
+	font-size: 55px;
+}
+
+.aboveTitle{
+	margin-top:15px;
+}
+
+.belowTitle {
+	
+}
+
+#hide{
+    margin-left:2em;
+    color:#154DA4;
+}
+#banner img{
+	display: block;
+	margin: 0 auto;
+}
+
+.formGrid {
+	display: grid;
+	grid-template-columns: 88px 777px;
+	justify-content: center;
+	margin-top: 15px;
+}
+
+.standard {
+	border:1px solid black;
+	text-align: center;
+	background-color: #6FD0DF;
+	height: 22px;
+}
+
+
+
+.comment {
+	border:1px solid black;
+    text-align:left;
+	background-color: #6FD0DF;
+	height: 88px;
+	margin:0px;
+	padding:0px;
+}
+
+.commentInput {
+
+}
+
+.submit{
+
+}
+
+.belowForm{
+	margin-top: 17px
+}
+
+#catalogGrid{
+	 margin:5px;
+	 display:-ms-flexbox;
+	 -ms-flexbox-wrap: wrap;
+	 -ms-flexbox-direction: column;
+	 -webkit-flex-flow: row wrap;
+	 flex-flow: row wrap;
+	 display: -webkit-box;
+	 display:flex;
+	 justify-content: center;
+}
+#catalogGrid div{
+	-webkit-box-flex:auto;
+	-ms-flex:auto;
+	flex: auto;
+	width:155px;
+	margin:.25vw;
+}
+
+
+
+
+
+
+#catalogGrid b{
+    padding-top:5px;
+}
+
+#thumbnail{
+    text-align:center;
+    height:300px;
+    padding:10px;
+}
+
+#thumbnail img{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+/**THREAD PAGE STYLES**/
+.post p{
+        margin:0;
+        padding:0;
+    }
+.postR p{
+        margin:0;
+        padding:0;
+    }
+.post {
+	min-width: 777px;
+    max-width:95%;
+	min-height: 77px;
+	/*margin-top: 4px;
+	margin-bottom: 4px;
+	margin-left: 2em;*/
+	padding: 0px;
+	overflow: auto;
+	display: inline-block;
+}
+.postR {
+	min-width: 777px;
+    max-width:95%;
+	min-height: 77px;
+	/*margin-top: 4px;
+	margin-bottom: 4px;
+	margin-left: 2em;*/
+	padding: 0px;
+	overflow: auto;
+	display: inline-block;
+	background: #deffef;
+	padding:5px;
+	border-style:outset;
+}
+
+
+/*.post a {
+	color: #deffef;
+}*/
+
+.post .header {
+	min-width: 350px;
+	max-width: 777px
+	padding: 1px;
+	padding-left: 4px;
+}
+
+.post .header2 {
+	min-height: 1px;
+	
+	padding: 1px;
+	padding-left: 4px;
+}
+
+.post .content {
+	min-height: 40px;
+	padding: 4px;
+	/*padding-right: 4px;*/
+	
+	overflow: auto;
+}
+.post .content img{
+	width: 233px;
+}
+.postR .content img{
+	width: 233px;
+}
+.post .footer {
+	margin-top: 2px;
+}
+.flag img{
+	width: 18px;
+}
+.post img {
+	margin-right: 4px;
+    max-height:1000px;
+    margin-right:7px;
+}
+.post img:hover {
+    box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+}
+
+.postR .header {
+	min-width: 350px;
+	max-width: 777px
+	padding: 1px;
+	padding-left: 4px;
+}
+
+.postR .header2 {
+	min-height: 1px;
+	
+	padding: 1px;
+	padding-left: 4px;
+}
+
+.postR .content {
+	min-height: 40px;
+	padding: 4px;
+	/*padding-right: 4px;*/
+	
+	overflow: auto;
+}
+
+.postR .footer {
+	margin-top: 2px;
+}
+
+.postR img {
+	margin-right: 4px;
+    
+    max-height:1000px;
+    margin-right:7px;
+}
+.postR img:hover {
+    box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+}
+
+.postNumb {
+	margin-left: 12px;
+	margin-right: 6px;
+	margin-top: 0px;
+    float:right;
+}
+.postNumb {
+	margin-left: 12px;
+	margin-right: 6px;
+	margin-top: 0px;
+    float:right;
+}
+.headerRight{
+    float:left;
+}
+
+.headerRightR{
+    float:left;
+}
+
+.wrapperPost{
+    text-align:left;
+    align-content: left;
+    margin-left:33px;
+}
+.wrapperPostR{
+    text-align:left;
+    align-content: left;
+    margin-left:33px;
+
+}
+
+/**^THREAD PAGE STYLES^**/
+
+.thumbnailImg{
+    width:133px;
+    max-height:300px;
+}
+
+#thumbnail{
+    overflow:hidden;
+}
+
+.textArea{
+    white-space: pre-wrap;
+    font-size:18px;
+    height:86px;
+}
+
+.repliesFooter{
+    background-color: #b0f8ff;
+   
+}
+
+/*HOME PAGE CSS*/
+
+.boardGrid {
+    border:1px solid black;
+    text-align: center;
+    width: 222px;
+}
+.boards {
+    background-color: #4cbfce;
+    border-bottom:1px solid black;
+}
+.anime {
+    text-align: left;
+    margin-top:7px;
+}
+.random {
+    text-align: left;
+    margin-top:7px;
+}
+.pol{
+    text-align: left;
+    margin-top:7px;
+    
+}
+.headerWrapper{
+    display:flex;
+    justify-content: center;
+    align-items:center;
+}
+
+.creedo{
+    border:1px solid black;
+    width:777px;
+    font-family: Verdana, Geneva, sans-serif;
+    padding: 33px;
+
+}
+.creedoWrapper{
+    margin-top:0px;
+    display:flex;
+    justify-content: center;
+    align-items:center;
+}
+
+#makePost{
+	text-align:center;
+	color:#154DA4;
+	font-size: 2em;
+}
+
+/*popupform styles VVV*/
+.popupForm{
+  display: none;
+  position: fixed;
+  top: 111px;
+  right: 15px;
+  border: 3px solid #0468BF;
+  background-color: #04B2D9;
+  z-index: 9;
+}
+
+.formGrid2{
+	display: grid;
+	grid-template-columns: 88px 333px;
+	justify-content: center;
+	margin-top: 15px;
+}
+
+/*arrow css VV*/
+#topArrow{
+    position: fixed;
+    top: 22px;
+    right: 15px;
+    z-index: 9;
+    font-size: 2.2em;
+}
+
+#bottomArrow{
+    position: fixed;
+    bottom: 22px;
+    right: 15px;
+    z-index: 9;
+    font-size:2.2em;
+}
+
+#captcha_text{
+	width:247px;
+}
+
+#captchaButtons{
+	display:grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: 1fr 1fr;
+}
+
+#svg{
+	display:grid;
+	grid-template-columns: 3fr 1fr;
+	grid-template-rows: 150px 20px;
+}
+
+#popup_comment{
+	display:grid;
+	grid-template-columns: 3fr 1fr;
+	grid-template-rows: 150px 20px;
+}
